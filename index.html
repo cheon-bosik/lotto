@@ -1,0 +1,293 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>행운의 로또 번호 뽑기</title>
+
+<style>
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    font-family: "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+    background: linear-gradient(135deg, #eef5ff, #f4f0ff);
+    color: #1e293b;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 760px;
+    background: #ffffff;
+    border-radius: 28px;
+    padding: 40px 24px;
+    text-align: center;
+    box-shadow: 0 15px 50px rgba(30, 41, 59, 0.12);
+  }
+
+  h1 {
+    font-size: clamp(30px, 6vw, 44px);
+    margin: 0 0 14px;
+    font-weight: 900;
+  }
+
+  .subtitle {
+    font-size: 21px;
+    color: #64748b;
+    margin-bottom: 35px;
+    line-height: 1.6;
+  }
+
+  .balls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin: 35px 0;
+    min-height: 100px;
+  }
+
+  .ball {
+    width: 86px;
+    height: 86px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 34px;
+    font-weight: 900;
+    color: #fff;
+    box-shadow:
+      inset -5px -7px 10px rgba(0, 0, 0, 0.14),
+      inset 4px 5px 10px rgba(255, 255, 255, 0.25),
+      0 6px 12px rgba(0, 0, 0, 0.12);
+    animation: pop 0.35s ease;
+  }
+
+  @keyframes pop {
+    0% {
+      transform: scale(0.5);
+      opacity: 0;
+    }
+    70% {
+      transform: scale(1.15);
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  .ball-1 { background: #fbc02d; color: #222; }
+  .ball-2 { background: #2196f3; }
+  .ball-3 { background: #f44336; }
+  .ball-4 { background: #9c27b0; }
+  .ball-5 { background: #4caf50; }
+  .ball-6 { background: #455a64; }
+
+  button {
+    width: 100%;
+    max-width: 400px;
+    padding: 23px 20px;
+    border: none;
+    border-radius: 18px;
+    background: linear-gradient(135deg, #2563eb, #4f46e5);
+    color: white;
+    font-size: 30px;
+    font-weight: 900;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.25);
+    transition: transform 0.15s, opacity 0.15s;
+  }
+
+  button:active {
+    transform: scale(0.97);
+  }
+
+  button:disabled {
+    opacity: 0.6;
+    cursor: wait;
+  }
+
+  .message {
+    font-size: 22px;
+    font-weight: 700;
+    color: #475569;
+    min-height: 35px;
+    margin: 20px 0;
+  }
+
+  .reset {
+    margin-top: 16px;
+    background: #64748b;
+    box-shadow: 0 8px 20px rgba(100, 116, 139, 0.2);
+  }
+
+  .footer {
+    margin-top: 30px;
+    color: #94a3b8;
+    font-size: 17px;
+    line-height: 1.7;
+  }
+
+  @media (max-width: 480px) {
+    .container {
+      padding: 30px 18px;
+    }
+
+    .balls {
+      gap: 10px;
+    }
+
+    .ball {
+      width: 68px;
+      height: 68px;
+      font-size: 28px;
+    }
+
+    button {
+      font-size: 26px;
+      padding: 20px 16px;
+    }
+
+    .subtitle {
+      font-size: 18px;
+    }
+  }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <h1>🍀 행운의 로또 번호 🍀</h1>
+
+  <div class="subtitle">
+    버튼을 누르면 행운의 숫자 6개가 나옵니다!
+  </div>
+
+  <div class="balls" id="balls">
+    <div class="ball ball-1">?</div>
+    <div class="ball ball-2">?</div>
+    <div class="ball ball-3">?</div>
+    <div class="ball ball-4">?</div>
+    <div class="ball ball-5">?</div>
+    <div class="ball ball-6">?</div>
+  </div>
+
+  <div class="message" id="message">
+    준비되셨나요?
+  </div>
+
+  <button id="drawButton" onclick="drawNumbers()">
+    🎲 번호 뽑기
+  </button>
+
+  <button class="reset" onclick="resetNumbers()">
+    🔄 다시 뽑기
+  </button>
+
+  <div class="footer">
+    숫자는 1부터 45까지 무작위로 선택됩니다.<br>
+    오늘도 행운이 가득하시길 바랍니다! 😊
+  </div>
+</div>
+
+<script>
+  const ballsContainer = document.getElementById("balls");
+  const message = document.getElementById("message");
+  const drawButton = document.getElementById("drawButton");
+
+  const colors = [
+    "ball-1",
+    "ball-2",
+    "ball-3",
+    "ball-4",
+    "ball-5",
+    "ball-6"
+  ];
+
+  let isDrawing = false;
+
+  function randomNumbers() {
+    const numbers = [];
+
+    while (numbers.length < 6) {
+      const number = Math.floor(Math.random() * 45) + 1;
+
+      if (!numbers.includes(number)) {
+        numbers.push(number);
+      }
+    }
+
+    return numbers.sort((a, b) => a - b);
+  }
+
+  function displayNumbers(numbers) {
+    ballsContainer.innerHTML = "";
+
+    numbers.forEach((number, index) => {
+      const ball = document.createElement("div");
+
+      ball.className = "ball " + colors[index];
+      ball.textContent = number;
+
+      ballsContainer.appendChild(ball);
+    });
+  }
+
+  function drawNumbers() {
+    if (isDrawing) return;
+
+    isDrawing = true;
+    drawButton.disabled = true;
+    message.textContent = "🍀 행운의 번호를 뽑는 중입니다...";
+
+    let count = 0;
+    const animationDuration = 1800;
+    const interval = 100;
+
+    const timer = setInterval(() => {
+      displayNumbers(randomNumbers());
+      count += interval;
+
+      if (count >= animationDuration) {
+        clearInterval(timer);
+
+        const finalNumbers = randomNumbers();
+        displayNumbers(finalNumbers);
+
+        message.textContent = "🎉 행운의 번호가 나왔습니다!";
+        drawButton.disabled = false;
+        isDrawing = false;
+      }
+    }, interval);
+  }
+
+  function resetNumbers() {
+    if (isDrawing) return;
+
+    ballsContainer.innerHTML = "";
+
+    colors.forEach((color) => {
+      const ball = document.createElement("div");
+      ball.className = "ball " + color;
+      ball.textContent = "?";
+      ballsContainer.appendChild(ball);
+    });
+
+    message.textContent = "준비되셨나요?";
+  }
+</script>
+
+</body>
+</html>
